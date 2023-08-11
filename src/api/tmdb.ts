@@ -1,6 +1,6 @@
 import { key } from "@/config/key";
 import { url } from "@/config/url";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
 export const getPopularMovies = (params: object) => {
   return axios
@@ -10,5 +10,15 @@ export const getPopularMovies = (params: object) => {
         Authorization: `Bearer ${key.tmdb.access_token}`,
       },
     })
-    .then((res) => res.data);
+    .then((res: AxiosResponse) => res.data);
+};
+
+export const getDetailMovies = (movie_id: string) => {
+  return axios
+    .get(`${url.tmdb}/movie/${movie_id}`, {
+      headers: {
+        Authorization: `Bearer ${key.tmdb.access_token}`,
+      },
+    })
+    .then((res: AxiosResponse) => res.data);
 };

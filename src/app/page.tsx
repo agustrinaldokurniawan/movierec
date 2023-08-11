@@ -3,7 +3,6 @@
 import { getPopularMovies } from "@/api/tmdb";
 import Layout from "@/components/layout/Layout";
 import Preview from "@/components/preview/Preview";
-import { IPreview } from "@/components/preview/interfaces/IPreview";
 import { useQuery } from "@tanstack/react-query";
 export default function Home() {
   const params = {
@@ -19,7 +18,5 @@ export default function Home() {
     queryFn: () => getPopularMovies(params),
   });
 
-  const singleMovie: IPreview = data && data?.results[0];
-
-  return <Layout>{singleMovie && <Preview {...singleMovie} />}</Layout>;
+  return <Layout>{data && <Preview id={data.results[0].id} />}</Layout>;
 }
