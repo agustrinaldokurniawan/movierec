@@ -15,6 +15,7 @@ import { Star } from "@mui/icons-material";
 import moment from "moment";
 import { convertHexToRgb } from "../../utils/convertHexToRgb";
 import { runtimeToHourAndMinute } from "../../utils/runtime-to-hour-and-minute";
+import { chipSx } from "../../common/styles/material-ui/chip";
 
 export default function Preview(props: IPreview) {
   const colorThief = new ColorThief();
@@ -78,11 +79,8 @@ export default function Preview(props: IPreview) {
                         <Chip
                           label={item.name}
                           key={key}
-                          variant={
-                            "genre-" +
-                            item.name.toLowerCase().split(" ").join("-")
-                          }
-                          // sx={{ backgroundColor: "custom.animation" }}
+                          sx={chipSx}
+                          data-genre={item.name.toLowerCase().split(" ").join("-")}
                         />
                       </Link>
                     </Grid>
@@ -97,7 +95,7 @@ export default function Preview(props: IPreview) {
                 {data.title}
               </Typography>
               <Box display={"flex"} alignItems={"center"} gap={1}>
-                <Star sx={{ color: "custom.star" }} />
+                <Star sx={{ color: "star" }} />
                 <Typography
                   color={isDominantColorDark ? "white" : "custom.dark"}
                 >
