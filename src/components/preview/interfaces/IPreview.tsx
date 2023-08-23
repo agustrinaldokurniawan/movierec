@@ -1,3 +1,3 @@
 export interface IPreview {
-  id: string
+  id: string;
 }

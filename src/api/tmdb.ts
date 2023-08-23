@@ -22,3 +22,13 @@ export const getDetailMovies = (movie_id: string) => {
     })
     .then((res: AxiosResponse) => res.data);
 };
+
+export const getImages = (movie_id: string) => {
+  return axios
+    .get(`${url.tmdb}/movie/${movie_id}/images`, {
+      headers: {
+        Authorization: `Bearer ${key.tmdb.access_token}`,
+      },
+    })
+    .then((res: AxiosResponse) => res.data);
+};

@@ -6,9 +6,9 @@ import { IPreview } from "./interfaces/IPreview";
 import Image from "next/image";
 import { tmdbImageLoader } from "@/utils/tmdb-image-loader";
 import { useQuery } from "@tanstack/react-query";
-import { getDetailMovies } from "../../api/tmdb";
+import { getDetailMovies, getImages } from "../../api/tmdb";
 import ColorThief from "colorthief";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import isDarkColor from "is-dark-color";
 import Link from "next/link";
 import { Star } from "@mui/icons-material";
@@ -16,8 +16,22 @@ import moment from "moment";
 import { convertHexToRgb } from "../../utils/convertHexToRgb";
 import { runtimeToHourAndMinute } from "../../utils/runtime-to-hour-and-minute";
 import { chipSx } from "../../common/styles/material-ui/chip";
+import Images from "../Images/Images";
 
 export default function Preview(props: IPreview) {
+  const [isDesktop, setIsDesktop] = useState(true);
+
+  function onChangeResize() {
+    setIsDesktop(window.innerWidth > 768);
+  }
+
+  useEffect(() => {
+    window.addEventListener("resize", onChangeResize);
+    return () => {
+      window.removeEventListener("resize", onChangeResize);
+    };
+  }, []);
+
   const colorThief = new ColorThief();
 
   const [dominantColor, setDominantColor] = useState<string>();
@@ -29,11 +43,18 @@ export default function Preview(props: IPreview) {
     queryFn: () => getDetailMovies(props.id),
   });
 
+  const { data: dataImages, isLoading: isLoadingImages } = useQuery({
+    queryKey: ["movie-images-" + props.id],
+    queryFn: () => getImages(props.id),
+  });
+
   const onLoadingImageComplete = (e: HTMLImageElement) => {
-    const hexColor = colorThief.getColor(e);
-    const rgbColor = convertHexToRgb(hexColor);
-    setDominantColor(rgbColor);
-    setIsDominantColorDark(isDarkColor(`#${rgbColor}`));
+    if (e) {
+      const hexColor = colorThief.getColor(e);
+      const rgbColor = convertHexToRgb(hexColor);
+      setDominantColor(rgbColor);
+      setIsDominantColorDark(isDarkColor(`#${rgbColor}`));
+    }
   };
 
   if (isLoading) {
@@ -48,7 +69,7 @@ export default function Preview(props: IPreview) {
     <Box sx={{ height: "100vh", position: "relative" }} bgcolor={grey[300]}>
       <Image
         loader={tmdbImageLoader}
-        src={data.backdrop_path}
+        src={isDesktop ? data.backdrop_path : data.poster_path}
         alt={data.title}
         fill
         className="object-cover"
@@ -56,16 +77,16 @@ export default function Preview(props: IPreview) {
         crossOrigin="anonymous"
       />
       <Box
-        className="absolute bottom-0 left-0 right-0 p-4 h-[100vh]"
+        className="absolute bottom-0 left-0 right-0 h-[100vh]"
         sx={{
           background: `linear-gradient(to top, #${dominantColor}, transparent)`,
         }}
         display={"flex"}
         alignItems={"flex-end"}
       >
-        <Grid container>
+        <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
-            <Stack spacing={1}>
+            <Stack spacing={1} p={4}>
               <Box>
                 <Grid container spacing={1}>
                   {data.genres.map((item: any, key: number) => (
@@ -79,8 +100,18 @@ export default function Preview(props: IPreview) {
                         <Chip
                           label={item.name}
                           key={key}
-                          sx={chipSx}
-                          data-genre={item.name.toLowerCase().split(" ").join("-")}
+                          sx={{
+                            ...chipSx,
+                            "& .MuiChip-label": {
+                              color: isDominantColorDark
+                                ? "white"
+                                : "custom.dark",
+                            },
+                          }}
+                          data-genre={item.name
+                            .toLowerCase()
+                            .split(" ")
+                            .join("-")}
                         />
                       </Link>
                     </Grid>
@@ -91,6 +122,7 @@ export default function Preview(props: IPreview) {
                 color={isDominantColorDark ? "white" : "custom.dark"}
                 variant="h3"
                 fontWeight={"700"}
+                textAlign={"left"}
               >
                 {data.title}
               </Typography>
@@ -122,6 +154,19 @@ export default function Preview(props: IPreview) {
               >
                 {data.overview}
               </Typography>
+            </Stack>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Stack>
+              <Typography
+                color={isDominantColorDark ? "white" : "custom.dark"}
+                variant="h6"
+                fontWeight={"700"}
+                textAlign={"left"}
+              >
+                Posters
+              </Typography>
+              {dataImages ? <Images images={dataImages.backdrops} /> : ""}
             </Stack>
           </Grid>
         </Grid>
