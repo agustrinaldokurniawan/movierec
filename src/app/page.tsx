@@ -12,22 +12,14 @@ import "swiper/css";
 import "swiper/css/pagination";
 
 import { Mousewheel, Navigation } from "swiper/modules";
+import { usePopularMovie } from "../hooks/movie/popular";
+import { paramsPopular } from "../base/movie/param-popular";
 
 export default function Home() {
   const [ids, setIds] = useState<string[]>([]);
 
-  const params = {
-    include_adult: false,
-    include_video: true,
-    language: "en-US",
-    page: 1,
-    sort_by: "popularity.desc",
-  };
-
-  const { data, isLoading, isFetched } = useQuery({
-    queryKey: [`movie-popular-page-1`],
-    queryFn: () => getPopularMovies(params),
-  });
+  const params = paramsPopular;
+  const { data, isLoading, isFetched } = usePopularMovie(params);
 
   useEffect(() => {
     if (isFetched) {
@@ -50,7 +42,7 @@ export default function Home() {
           }}
           navigation={true}
           modules={[Mousewheel, Navigation]}
-          className="mySwiper"
+          className="h-[100vh]"
         >
           <SwiperSlide>
             <Box width={"100vw"} height={"100vh"}>
@@ -58,9 +50,7 @@ export default function Home() {
             </Box>
           </SwiperSlide>
           <SwiperSlide>
-            <Box width={"100vw"} height={"100vh"}>
-              <p>Test</p>
-            </Box>
+            <p>Test2</p>
           </SwiperSlide>
         </Swiper>
       </Box>

@@ -1,12 +1,10 @@
 "use client";
 
-import { Box, Grid, Stack, Typography, Chip } from "@mui/material";
+import { Box, Grid, Stack, Typography, Tooltip } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { IPreview } from "./interfaces/IPreview";
 import Image from "next/image";
 import { tmdbImageLoader } from "@/utils/tmdb-image-loader";
-import { useQuery } from "@tanstack/react-query";
-import { getDetailMovies, getImages } from "../../api/tmdb";
 import ColorThief from "colorthief";
 import { useEffect, useState } from "react";
 import isDarkColor from "is-dark-color";
@@ -15,8 +13,11 @@ import { Star } from "@mui/icons-material";
 import moment from "moment";
 import { convertHexToRgb } from "../../utils/convertHexToRgb";
 import { runtimeToHourAndMinute } from "../../utils/runtime-to-hour-and-minute";
-import { chipSx } from "../../common/styles/material-ui/chip";
 import Images from "../Images/Images";
+import { useDetailMovie } from "../../hooks/movie/detail";
+import { useImagesMovie } from "../../hooks/movie/images";
+import { useCreditsMovie } from "../../hooks/movie/credits";
+import Genre from "./Genre";
 
 export default function Preview(props: IPreview) {
   const [isDesktop, setIsDesktop] = useState(true);
@@ -32,22 +33,19 @@ export default function Preview(props: IPreview) {
     };
   }, []);
 
-  const colorThief = new ColorThief();
-
   const [dominantColor, setDominantColor] = useState<string>();
   const [isDominantColorDark, setIsDominantColorDark] =
     useState<boolean>(false);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["movie-" + props.id],
-    queryFn: () => getDetailMovies(props.id),
-  });
+  const { data, isLoading } = useDetailMovie(props.id);
+  const { data: dataImages, isLoading: isLoadingImages } = useImagesMovie(
+    props.id
+  );
+  const { data: dataCredits, isLoading: isLoadingCredits } = useCreditsMovie(
+    props.id
+  );
 
-  const { data: dataImages, isLoading: isLoadingImages } = useQuery({
-    queryKey: ["movie-images-" + props.id],
-    queryFn: () => getImages(props.id),
-  });
-
+  const colorThief = new ColorThief();
   const onLoadingImageComplete = (e: HTMLImageElement) => {
     if (e) {
       const hexColor = colorThief.getColor(e);
@@ -87,37 +85,10 @@ export default function Preview(props: IPreview) {
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
             <Stack spacing={1} p={4}>
-              <Box>
-                <Grid container spacing={1}>
-                  {data.genres.map((item: any, key: number) => (
-                    <Grid item>
-                      <Link
-                        href={`/explore?genres=[${item.name
-                          .toLowerCase()
-                          .split(" ")
-                          .join("-")}]`}
-                      >
-                        <Chip
-                          label={item.name}
-                          key={key}
-                          sx={{
-                            ...chipSx,
-                            "& .MuiChip-label": {
-                              color: isDominantColorDark
-                                ? "white"
-                                : "custom.dark",
-                            },
-                          }}
-                          data-genre={item.name
-                            .toLowerCase()
-                            .split(" ")
-                            .join("-")}
-                        />
-                      </Link>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Box>
+              <Genre
+                genres={data.genres}
+                isDominantColorDark={isDominantColorDark}
+              />
               <Typography
                 color={isDominantColorDark ? "white" : "custom.dark"}
                 variant="h3"
@@ -157,16 +128,82 @@ export default function Preview(props: IPreview) {
             </Stack>
           </Grid>
           <Grid item xs={12} md={6}>
-            <Stack>
-              <Typography
-                color={isDominantColorDark ? "white" : "custom.dark"}
-                variant="h6"
-                fontWeight={"700"}
-                textAlign={"left"}
-              >
-                Posters
-              </Typography>
-              {dataImages ? <Images images={dataImages.backdrops} /> : ""}
+            <Stack pt={4} mb={4}>
+              <Stack>
+                <Typography
+                  color={isDominantColorDark ? "white" : "custom.dark"}
+                  variant="h6"
+                  fontWeight={"700"}
+                  textAlign={"left"}
+                >
+                  Posters
+                </Typography>
+                {dataImages ? <Images images={dataImages.backdrops} /> : ""}
+              </Stack>
+              <Stack mt={4}>
+                <Typography
+                  color={isDominantColorDark ? "white" : "custom.dark"}
+                  variant="h6"
+                  fontWeight={"700"}
+                  textAlign={"left"}
+                >
+                  Actors
+                </Typography>
+                {dataCredits ? (
+                  <Box>
+                    <Grid container spacing={2}>
+                      {dataCredits.cast
+                        .slice(0, 5)
+                        .map((item: any, key: number) => (
+                          <Grid item key={key}>
+                            <Tooltip title={item.name}>
+                              <Box width={50} height={50} className="relative">
+                                <Image
+                                  loader={tmdbImageLoader}
+                                  src={item.profile_path}
+                                  fill
+                                  className="rounded-full object-cover"
+                                  alt={item.name}
+                                />
+                              </Box>
+                            </Tooltip>
+                          </Grid>
+                        ))}
+                      {dataCredits.cast.length > 5 ? (
+                        <Grid item>
+                          <Tooltip title={"More"}>
+                            <Box
+                              width={50}
+                              height={50}
+                              className="rounded-full"
+                              display={"flex"}
+                              justifyContent={"center"}
+                              alignItems={"center"}
+                              sx={{
+                                backgroundColor: !isDominantColorDark
+                                  ? "white"
+                                  : "custom.dark",
+                              }}
+                            >
+                              <Typography
+                                color={
+                                  isDominantColorDark ? "white" : "custom.dark"
+                                }
+                              >
+                                More
+                              </Typography>
+                            </Box>
+                          </Tooltip>
+                        </Grid>
+                      ) : (
+                        ""
+                      )}
+                    </Grid>
+                  </Box>
+                ) : (
+                  ""
+                )}
+              </Stack>
             </Stack>
           </Grid>
         </Grid>
