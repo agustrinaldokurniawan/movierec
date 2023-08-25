@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Grid, Stack, Typography } from "@mui/material";
+import { Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { IPreview } from "./interfaces/IPreview";
 import Image from "next/image";
@@ -22,6 +22,7 @@ import PreviewGenre from "./Genre";
 import { useProvidersMovie } from "../../hooks/movie/provider";
 import PreviewProviders from "./VodProviders";
 import { IProvider } from "../../common/interfaces/IProvider";
+import { StyleConstants } from "../../common/styles/style-constants";
 
 export default function Preview(props: IPreview) {
   const colorThief = new ColorThief();
@@ -150,12 +151,59 @@ export default function Preview(props: IPreview) {
               <Typography
                 color={isDominantColorDark ? "white" : "custom.dark"}
                 textAlign={"justify"}
+                className="line-clamp-3"
               >
                 {data.overview}
               </Typography>
+              <Box>
+                <Grid container spacing={2}>
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        "&.MuiButton-root": {
+                          backgroundColor: `#${dominantColor}`,
+                        },
+                      }}
+                    >
+                      <Typography
+                        color={
+                          isDominantColorDark
+                            ? "white"
+                            : StyleConstants.color.dark
+                        }
+                      >
+                        Read More
+                      </Typography>
+                    </Button>
+                  </Grid>
+                  <Grid item>
+                    <Button
+                      variant="outlined"
+                      sx={{
+                        "&.MuiButton-root": {
+                          borderColor: isDominantColorDark
+                            ? "white"
+                            : StyleConstants.color.dark,
+                        },
+                      }}
+                    >
+                      <Typography
+                        color={
+                          isDominantColorDark
+                            ? "white"
+                            : StyleConstants.color.dark
+                        }
+                      >
+                        Trailer
+                      </Typography>
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Box>
             </Stack>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item md={6} sx={{ display: { xs: "none" } }}>
             <Stack pt={4} mb={4}>
               <Stack>
                 <Typography
