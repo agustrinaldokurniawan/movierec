@@ -1,14 +1,20 @@
-"use client";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 
-import { Box } from "@mui/material";
 import { IImages } from "./IImages";
 import Image from "next/image";
 import { tmdbImageLoader } from "../../utils/tmdb-image-loader";
+import { IImage } from "../../common/interfaces/IImage";
 
 export default function Images(props: IImages) {
+  if (!props.images?.length) {
+    return (
+      <>
+        <p>Empty Images</p>
+      </>
+    );
+  }
   return (
     <Swiper
       direction={"horizontal"}
@@ -17,7 +23,7 @@ export default function Images(props: IImages) {
       nested={true}
       className="w-[100%] h-[100px]"
     >
-      {props.images.map((item: any, key: number) => (
+      {props.images.map((item: IImage, key: number) => (
         <SwiperSlide key={key}>
           <Image
             loader={tmdbImageLoader}

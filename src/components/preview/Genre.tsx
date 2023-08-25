@@ -1,19 +1,21 @@
 import { Box, Chip, Grid } from "@mui/material";
-import { IGenre } from "./interfaces/IGenre";
+import { IGenre } from "../../common/interfaces/IGenre";
 import Link from "next/link";
 import { chipSx } from "../../common/styles/material-ui/chip";
+import { IPreviewGenre } from "./interfaces/IPreviewGenre";
 
-export default function Genre({
-  genres,
-  isDominantColorDark,
-}: {
-  genres: IGenre[];
-  isDominantColorDark: boolean;
-}) {
+export default function PreviewGenre(props: IPreviewGenre) {
+  if (!props.genres?.length) {
+    return (
+      <>
+        <p>Empty Genre</p>
+      </>
+    );
+  }
   return (
     <Box>
       <Grid container spacing={1}>
-        {genres.map((item: IGenre) => (
+        {props.genres.map((item: IGenre) => (
           <Grid item key={item.id}>
             <Link
               href={`/explore?genres=[${item.name
@@ -26,7 +28,7 @@ export default function Genre({
                 sx={{
                   ...chipSx,
                   "& .MuiChip-label": {
-                    color: isDominantColorDark ? "white" : "custom.dark",
+                    color: props.isDominantColorDark ? "white" : "custom.dark",
                   },
                 }}
                 data-genre={item.name.toLowerCase().split(" ").join("-")}

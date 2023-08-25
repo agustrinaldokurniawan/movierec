@@ -1,4 +1,4 @@
-export interface IDetail {
+export interface IDetailHooks {
   backdrop_path: string;
   genres: {
     id: number;

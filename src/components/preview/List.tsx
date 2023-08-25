@@ -1,16 +1,13 @@
-"use client";
-
-import { useRef } from "react";
 import Preview from "./Preview";
-import { IList } from "./interfaces/IList";
+import { IPreviewList } from "./interfaces/IPreviewList";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 
-import { Mousewheel, Autoplay, Navigation } from "swiper/modules";
+import { Mousewheel, Navigation } from "swiper/modules";
 import { Box } from "@mui/material";
 
-export default function ListPreview(props: IList) {
+export default function PreviewList(props: IPreviewList) {
   return (
     <Swiper
       direction={"horizontal"}

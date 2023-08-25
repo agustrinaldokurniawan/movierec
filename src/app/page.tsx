@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { getPopularMovies } from "@/api/tmdb";
 import Layout from "@/components/layout/Layout";
 import { useQuery } from "@tanstack/react-query";
-import ListPreview from "../components/preview/List";
 import { Box } from "@mui/material";
 import { Swiper, SwiperSlide } from "swiper/react";
 
@@ -14,6 +13,7 @@ import "swiper/css/pagination";
 import { Mousewheel, Navigation } from "swiper/modules";
 import { usePopularMovie } from "../hooks/movie/popular";
 import { paramsPopular } from "../base/movie/param-popular";
+import PreviewList from "../components/preview/List";
 
 export default function Home() {
   const [ids, setIds] = useState<string[]>([]);
@@ -22,7 +22,7 @@ export default function Home() {
   const { data, isLoading, isFetched } = usePopularMovie(params);
 
   useEffect(() => {
-    if (isFetched) {
+    if (isFetched && data) {
       setIds(data.results.map((item: any) => item.id));
     }
   }, [isFetched]);
@@ -46,7 +46,7 @@ export default function Home() {
         >
           <SwiperSlide>
             <Box width={"100vw"} height={"100vh"}>
-              {ids.length ? <ListPreview ids={ids} /> : ""}
+              {ids.length ? <PreviewList ids={ids} /> : ""}
             </Box>
           </SwiperSlide>
           <SwiperSlide>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Grid, Stack, Typography, Tooltip } from "@mui/material";
+import { Box, Grid, Stack, Typography } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { IPreview } from "./interfaces/IPreview";
 import Image from "next/image";
@@ -17,25 +17,21 @@ import Images from "../Images/Images";
 import { useDetailMovie } from "../../hooks/movie/detail";
 import { useImagesMovie } from "../../hooks/movie/images";
 import { useCreditsMovie } from "../../hooks/movie/credits";
-import Genre from "./Genre";
+import PreviewCredits from "./Credits";
+import PreviewGenre from "./Genre";
+import { useProvidersMovie } from "../../hooks/movie/provider";
+import PreviewProviders from "./VodProviders";
+import { IProvider } from "../../common/interfaces/IProvider";
 
 export default function Preview(props: IPreview) {
+  const colorThief = new ColorThief();
+
   const [isDesktop, setIsDesktop] = useState(true);
-
-  function onChangeResize() {
-    setIsDesktop(window.innerWidth > 768);
-  }
-
-  useEffect(() => {
-    window.addEventListener("resize", onChangeResize);
-    return () => {
-      window.removeEventListener("resize", onChangeResize);
-    };
-  }, []);
-
   const [dominantColor, setDominantColor] = useState<string>();
   const [isDominantColorDark, setIsDominantColorDark] =
     useState<boolean>(false);
+  const [vodProviders, setVodProviders] = useState<IProvider[]>([]);
+  const region = "US";
 
   const { data, isLoading } = useDetailMovie(props.id);
   const { data: dataImages, isLoading: isLoadingImages } = useImagesMovie(
@@ -44,8 +40,26 @@ export default function Preview(props: IPreview) {
   const { data: dataCredits, isLoading: isLoadingCredits } = useCreditsMovie(
     props.id
   );
+  const { data: dataProviders, isLoading: isLoadingProviders } =
+    useProvidersMovie(props.id);
 
-  const colorThief = new ColorThief();
+  function onChangeResize() {
+    setIsDesktop(window.innerWidth > 768);
+  }
+
+  useEffect(() => {
+    if (dataProviders && dataProviders.results[region]) {
+      setVodProviders(dataProviders.results[region].flatrate);
+    }
+  }, [dataProviders]);
+
+  useEffect(() => {
+    window.addEventListener("resize", onChangeResize);
+    return () => {
+      window.removeEventListener("resize", onChangeResize);
+    };
+  }, []);
+
   const onLoadingImageComplete = (e: HTMLImageElement) => {
     if (e) {
       const hexColor = colorThief.getColor(e);
@@ -59,6 +73,14 @@ export default function Preview(props: IPreview) {
     return (
       <>
         <p>Loading...</p>
+      </>
+    );
+  }
+
+  if (!data) {
+    return (
+      <>
+        <p>Data Error</p>
       </>
     );
   }
@@ -82,10 +104,16 @@ export default function Preview(props: IPreview) {
         display={"flex"}
         alignItems={"flex-end"}
       >
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
+        <Grid container spacing={2} alignItems={"flex-end"}>
+          <Grid
+            item
+            xs={12}
+            md={6}
+            justifyContent={"flex-end"}
+            alignItems={"flex-end"}
+          >
             <Stack spacing={1} p={4}>
-              <Genre
+              <PreviewGenre
                 genres={data.genres}
                 isDominantColorDark={isDominantColorDark}
               />
@@ -138,7 +166,7 @@ export default function Preview(props: IPreview) {
                 >
                   Posters
                 </Typography>
-                {dataImages ? <Images images={dataImages.backdrops} /> : ""}
+                <Images images={dataImages?.backdrops} />
               </Stack>
               <Stack mt={4}>
                 <Typography
@@ -149,60 +177,24 @@ export default function Preview(props: IPreview) {
                 >
                   Actors
                 </Typography>
-                {dataCredits ? (
-                  <Box>
-                    <Grid container spacing={2}>
-                      {dataCredits.cast
-                        .slice(0, 5)
-                        .map((item: any, key: number) => (
-                          <Grid item key={key}>
-                            <Tooltip title={item.name}>
-                              <Box width={50} height={50} className="relative">
-                                <Image
-                                  loader={tmdbImageLoader}
-                                  src={item.profile_path}
-                                  fill
-                                  className="rounded-full object-cover"
-                                  alt={item.name}
-                                />
-                              </Box>
-                            </Tooltip>
-                          </Grid>
-                        ))}
-                      {dataCredits.cast.length > 5 ? (
-                        <Grid item>
-                          <Tooltip title={"More"}>
-                            <Box
-                              width={50}
-                              height={50}
-                              className="rounded-full"
-                              display={"flex"}
-                              justifyContent={"center"}
-                              alignItems={"center"}
-                              sx={{
-                                backgroundColor: !isDominantColorDark
-                                  ? "white"
-                                  : "custom.dark",
-                              }}
-                            >
-                              <Typography
-                                color={
-                                  isDominantColorDark ? "white" : "custom.dark"
-                                }
-                              >
-                                More
-                              </Typography>
-                            </Box>
-                          </Tooltip>
-                        </Grid>
-                      ) : (
-                        ""
-                      )}
-                    </Grid>
-                  </Box>
-                ) : (
-                  ""
-                )}
+                <PreviewCredits
+                  cast={dataCredits?.cast}
+                  isDominantColorDark={isDominantColorDark}
+                />
+              </Stack>
+              <Stack mt={4}>
+                <Typography
+                  color={isDominantColorDark ? "white" : "custom.dark"}
+                  variant="h6"
+                  fontWeight={"700"}
+                  textAlign={"left"}
+                >
+                  VoD
+                </Typography>
+                <PreviewProviders
+                  providers={vodProviders}
+                  isDominantColorDark={isDominantColorDark}
+                />
               </Stack>
             </Stack>
           </Grid>
