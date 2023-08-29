@@ -1,5 +1,7 @@
-import { IProvider } from "../../../common/interfaces/IProvider";
-export interface IPreviewProviders {
-  providers?: IProvider[];
+import { StackProps } from "@mui/material";
+
+export interface IPreviewProviders extends StackProps {
   isDominantColorDark?: boolean;
+  movie_id: string | number;
+  region: string;
 }
